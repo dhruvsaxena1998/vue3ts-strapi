@@ -1,4 +1,4 @@
-import Vue, { reactive } from "vue";
+import { reactive } from "vue";
 import Axios, { AxiosInstance } from "axios";
 import Storage from "./storage";
 import { initState, Defaults, StorageType, Keys, User } from "./types";
@@ -13,7 +13,7 @@ const defaults: Defaults = {
 class Strapi {
   state: initState;
   $http: AxiosInstance;
-  storage;
+  storage: Storage;
 
   constructor(options: Defaults) {
     const instance = Axios.create({
@@ -59,3 +59,15 @@ class Strapi {
     }
   }
 }
+
+const strapi = {
+  install: (Vue, options = defaults) => {
+    const instance = new Strapi(options);
+
+    Vue.provide('$strapi', instance);
+    Vue.config.globalProperties.$strapi = instance
+
+  }
+}
+
+export default strapi;

@@ -1,7 +1,7 @@
 type Defaults = {
   url: string;
   entities: string[];
-  storage?: StorageType
+  storage?: StorageType;
   storagePrefix?: string;
 }
 

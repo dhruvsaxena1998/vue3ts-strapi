@@ -7,7 +7,7 @@ export default class Storage {
   storage: StorageType;
   _prefix: string;
 
-  constructor(storage = StorageType.COOKIES, prefix: string = 'strapi') {
+  constructor(storage = StorageType.COOKIES, prefix = 'strapi') {
     this.storage = storage;
     this._prefix = prefix;
   }
@@ -17,7 +17,7 @@ export default class Storage {
   }
   
 
-  getItem(key: string): any {
+  getItem(key: string) {
     key = this._generateKey(key);
 
     switch (this.storage) {
@@ -65,6 +65,7 @@ export default class Storage {
         return true
       case StorageType.SESSIONSTORAGE:
         sessionStorage.removeItem(key);
+        return true;
       default: return false;
     }
   }
