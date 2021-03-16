@@ -8,12 +8,12 @@ export default class Storage {
   _prefix: string;
 
   constructor(storage = StorageType.COOKIES, prefix = 'strapi') {
-    this.storage = storage;
+    this.storage = StorageType[storage.toUpperCase()];
     this._prefix = prefix;
   }
 
   _generateKey (key: string): string {
-    return `${this._prefix}:${key}`
+    return `__${this._prefix}_${key}`
   }
   
 
