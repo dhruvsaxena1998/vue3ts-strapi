@@ -221,7 +221,6 @@ const strapi = {
   install: (Vue, options = defaults) => {
     const instance: Strapi = new Strapi(options);
 
-
     options.entities.forEach(entity => {
       const type = "collection";
 
@@ -269,9 +268,24 @@ const strapi = {
       });
     });
 
+    if (!instance.user && instance.getAuthorizationToken()) {
+      instance.fetchUser()
+    }
+
     Vue.provide("$strapi", instance);
     Vue.config.globalProperties.$strapi = instance;
   },
 };
+
+// Automatic installation if Vue has been added to the global scope.
+declare global {
+  interface Window {
+    Vue: any
+  }
+}
+
+if (typeof window !== "undefined" && window.Vue) {
+  window.Vue.use(strapi);
+}
 
 export default strapi;
