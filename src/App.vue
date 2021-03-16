@@ -35,7 +35,8 @@ export default defineComponent({
             __v: 0,
             id: "604cceb7f133c7272c7639af",
           },
-          id: "604cd2f16af1d624ccd3f665"
+          id: "604cd2f16af1d624ccd3f665",
+          name: "Dhruv Saxena"
         };
 
       setTimeout(() => {

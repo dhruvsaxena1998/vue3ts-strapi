@@ -12,6 +12,7 @@ export type Role = {
   description: string;
   type: string;
   __v: number;
+  [key: string]: any;
 }
 
 export interface User {
@@ -26,6 +27,7 @@ export interface User {
   updatedAt: string;
   __v: number;
   role: Role;
+  [key: string]: any; // dynamic properites
 }
 
 export type UserRegister = {
