@@ -41,7 +41,7 @@ export type UserLogin = {
   password: string;
 }
 
-interface UserAuthResponse {
+export interface UserAuthResponse {
   jwt: string;
   user: User;
 }
@@ -50,12 +50,16 @@ export type ForgotPassword = {
   email: string;
 }
 
-export interface StrapiInstance {
-  user: User;
-  setUser: (user: User) => void;
-  register: (data: UserRegister) => UserAuthResponse;
-  login: (data: UserLogin) => UserAuthResponse;
-  forgotPassword: (data: ForgotPassword) => boolean;
+
+export type ResetPassword = {
+  password: string;
+  passwordConfirmation: string;
+  code: string;
+}
+
+export type SendEmailConfirmation = {
+  email: string;
+  sent: boolean;
 }
 
 export type initState = {

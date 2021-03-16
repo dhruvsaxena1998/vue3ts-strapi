@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance } from "vue";
-import { StrapiInstance } from './plugins/strapi/types'
+import { StrapiInstance } from './plugins/strapi'
 
 export default defineComponent({
   name: "App",
