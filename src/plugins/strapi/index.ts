@@ -221,6 +221,54 @@ const strapi = {
   install: (Vue, options = defaults) => {
     const instance: Strapi = new Strapi(options);
 
+
+    options.entities.forEach(entity => {
+      const type = "collection";
+
+      if (Object.prototype.hasOwnProperty.call(strapi, entity)) {
+        return;
+      }
+
+      Object.defineProperty(strapi, entity, {
+        get() {
+          const self = this;
+          return {
+            single: {
+              find(...args) {
+                return self.find(entity, ...args);
+              },
+              update(...args) {
+                return self.update(entity, ...args);
+              },
+              delete(...args) {
+                return self.delete(entity, ...args);
+              }
+            },
+            collection: {
+              find(...args) {
+                return self.find(entity, ...args);
+              },
+              findOne(...args) {
+                return self.findOne(entity, ...args);
+              },
+              count(...args) {
+                return self.count(entity, ...args);
+              },
+              create(...args) {
+                return self.create(entity, ...args);
+              },
+              update(...args) {
+                return self.update(entity, ...args);
+              },
+              delete(...args) {
+                return self.delete(entity, ...args);
+              }
+            }
+          }[type];
+        }
+      });
+    });
+
     Vue.provide("$strapi", instance);
     Vue.config.globalProperties.$strapi = instance;
   },
