@@ -126,7 +126,7 @@ class Strapi {
   }
 
   // Entities Queries
-  async find(entity: string, params: string): Promise<Array<any> | Object> {
+  async find(entity: string, params: string): Promise<Array<any>> {
     const { data } = await this.$http.get(`/${entity}`, { params });
 
     return data;
@@ -164,7 +164,7 @@ class Strapi {
   async delete(
     entity: string,
     id: number | string
-  ): Promise<Array<any> | Object> {
+  ): Promise<Object> {
     const path = [entity, id].filter(Boolean).join("/");
     const { data } = await this.$http.delete(`/${path}`);
 
