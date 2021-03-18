@@ -79,5 +79,6 @@ export enum DebugType {
 }
 
 export enum Keys {
-  AUTHTOKEN = 'AUTHTOKEN'
+  AUTHTOKEN = 'AUTHTOKEN',
+  PROVIDER = 'PROVIDER'
 }

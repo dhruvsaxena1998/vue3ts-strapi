@@ -15,47 +15,52 @@ const defaults: Types.Defaults = {
 };
 
 class Strapi {
-  #state: Types.initState;
+  private state: Types.initState;
   $http: AxiosInstance;
   storage: Storage;
-
+  options: Types.Defaults;
   constructor(options: Types.Defaults) {
     const instance = Axios.create({
       baseURL: options.url || defaults.url,
     });
 
-    this.#state = reactive({ user: null });
+    this.state = reactive({ user: null });
     this.$http = instance;
     this.storage = new Storage(
       options.storage || defaults.storage,
       options.storagePrefix || defaults.storagePrefix
     );
 
+    this.options = options;
+
     this.setAuthorizationToken(this.getAuthorizationToken());
   }
 
   get user(): Types.User | null {
-    return this.#state.user;
+    return this.state.user;
   }
 
   set user(user: Types.User | null) {
-    this.#state.user = user;
+    this.state.user = user;
   }
 
   setUser(user: Types.User | null) {
     this.user = user;
   }
 
-  async authorization(data: Types.UserLogin | Types.UserRegister, url: string) {
+  async authorization(
+    data: Types.UserLogin | Types.UserRegister,
+    url: string
+  ): Promise<Types.UserAuthResponse | ErrorConstructor> {
     this.clearAuthorizationToken();
     try {
-      const {
-        data: { jwt, user },
-      } = await this.$http.post(url, data);
-      this.setAuthorizationToken(jwt);
-      this.setUser(user);
+      const { data: response } = await this.$http.post(url, data);
+      this.setAuthorizationToken(response.jwt);
+      this.setUser(response.user);
+
+      return response;
     } catch (e) {
-      return new Error(e);
+      return e;
     }
   }
 
@@ -65,6 +70,38 @@ class Strapi {
 
   async login(data: Types.UserLogin, url = "/auth/local") {
     return await this.authorization(data, url);
+  }
+
+  loginWithProvider(provider: string, url = "/connect/") {
+    this.storage.setItem(Types.Keys.PROVIDER, provider);
+    window.open(this.options.url + url + provider);
+  }
+
+  async completeLoginWithProvider(
+    callbackPage = "/redirect",
+    provider?: string
+  ): Promise<boolean | Types.UserAuthResponse | ErrorConstructor> {
+    const providerFromStorage =
+      this.storage.getItem(Types.Keys.PROVIDER) || provider;
+    const [parameter] = window.location.href.split(callbackPage);
+
+    if (!parameter || !providerFromStorage) {
+      this.storage.removeItem(Types.Keys.PROVIDER);
+      return false;
+    }
+
+    try {
+      const { data } = await this.$http.get(
+        `/auth/${provider}/callback?${parameter}`
+      );
+
+      this.saveAuthorizationToken(data.jwt);
+      this.storage.removeItem(Types.Keys.PROVIDER);
+
+      return <Types.UserAuthResponse>data;
+    } catch (e) {
+      return e;
+    }
   }
 
   logout() {
@@ -161,10 +198,7 @@ class Strapi {
     return data;
   }
 
-  async delete(
-    entity: string,
-    id: number | string
-  ): Promise<Object> {
+  async delete(entity: string, id: number | string): Promise<Object> {
     const path = [entity, id].filter(Boolean).join("/");
     const { data } = await this.$http.delete(`/${path}`);
 
@@ -221,7 +255,7 @@ const strapi = {
   install: (Vue, options = defaults) => {
     const instance: Strapi = new Strapi(options);
 
-    options.entities.forEach(entity => {
+    options.entities.forEach((entity) => {
       const type = "collection";
 
       if (Object.prototype.hasOwnProperty.call(strapi, entity)) {
@@ -241,7 +275,7 @@ const strapi = {
               },
               delete(...args) {
                 return self.delete(entity, ...args);
-              }
+              },
             },
             collection: {
               find(...args) {
@@ -261,15 +295,15 @@ const strapi = {
               },
               delete(...args) {
                 return self.delete(entity, ...args);
-              }
-            }
+              },
+            },
           }[type];
-        }
+        },
       });
     });
 
     if (!instance.user && instance.getAuthorizationToken()) {
-      instance.fetchUser()
+      instance.fetchUser();
     }
 
     Vue.provide("$strapi", instance);
@@ -280,7 +314,7 @@ const strapi = {
 // Automatic installation if Vue has been added to the global scope.
 declare global {
   interface Window {
-    Vue: any
+    Vue: any;
   }
 }
 
